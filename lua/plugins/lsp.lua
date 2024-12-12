@@ -47,11 +47,19 @@ return {
       on_attach = on_attach,
       settings = {
         python = {
-          telemetry = {enable = false},
-          workspace = {checkThirdparty = false},
+          telemetry = { enable = false },
+          workspace = { checkThirdparty = false },
         },
       },
 
+    })
+    require('lspconfig').ts_ls.setup({
+
+      on_attach = on_attach,
+      filetypes = {
+        'javascript',
+        'typescript',
+      },
     })
   end
 }
