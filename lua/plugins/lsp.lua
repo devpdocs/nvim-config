@@ -33,6 +33,9 @@ return {
       end, opts)
     end
 
+    local capabilities = vim.lsp.protocol.make_client_capabilities()
+    capabilities.textDocument.completion.completionItem.snippetSupport = true
+
     require('neodev').setup()
     require('lspconfig').lua_ls.setup({
       on_attach = on_attach,
@@ -60,6 +63,14 @@ return {
         'javascript',
         'typescript',
       },
+    })
+    require('lspconfig').html.setup({
+      capabilities = capabilities,
+      on_attach = on_attach
+    })
+    require('lspconfig').cssls.setup({
+      on_attch = on_attach,
+      capabilities = capabilities
     })
   end
 }
