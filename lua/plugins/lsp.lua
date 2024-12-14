@@ -9,7 +9,7 @@ return {
     vim.keymap.set('n', '[d', vim.diagnostic.goto_prev)
     vim.keymap.set('n', ']d', vim.diagnostic.goto_next)
     vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist)
-    local on_attach = function(_, bufnr)
+    local on_attach = function(client, bufnr)
       --- auto_complete ctr-x + ctrl-o
       vim.keymap.set('n', '.', vim.lsp.buf.hover, { buffer = bufnr })
       vim.bo[bufnr].omnifunc = 'v:lua.vim.lsp.omnifunc'
@@ -31,6 +31,9 @@ return {
       vim.keymap.set('n', '<leader>f', function()
         vim.lsp.buf.format { async = true }
       end, opts)
+      if client.name == "rust_analyzer" then
+        vim.lsp.inlay_hint.enable(true, { bufnr = bufnr })
+      end
     end
 
     local capabilities = vim.lsp.protocol.make_client_capabilities()
@@ -71,6 +74,13 @@ return {
     require('lspconfig').cssls.setup({
       on_attch = on_attach,
       capabilities = capabilities
+    })
+    require('lspconfig').jsonls.setup({
+      on_attch = on_attach,
+      capabilities = capabilities
+    })
+    require('lspconfig').rust_analyzer.setup({
+      on_attch = on_attach,
     })
   end
 }
