@@ -12,3 +12,7 @@ vim.keymap.set('n', 'n', 'nzzzv', { desc = "Goes to the next result on the seach
 vim.keymap.set('n', 'N', 'Nzzzv', { desc = "Goes to the prev result on the seach and put the cursor in the middle" })
 vim.keymap.set('n', '<C-fs>', ':%! jq<cr>', {desc = 'it Formats all the current json file way extatnal'})
 vim.keymap.set('x', '<C-so>', ':.,$!sort<cr>', {desc = 'Sorts all elements selected'})
+vim.keymap.set('n', '<Tab>,', '"+p', {desc = "Page external data to nvim"})
+
+
+
