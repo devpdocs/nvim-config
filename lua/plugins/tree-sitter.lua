@@ -1,17 +1,17 @@
-  return {
+return {
   'nvim-treesitter/nvim-treesitter',
-  dependencies = {'nvim-treesitter/nvim-treesitter-textobjects'},
+  dependencies = { 'nvim-treesitter/nvim-treesitter-textobjects' },
   build = ":TSUpdate",
   event = 'VeryLazy',
   main = 'nvim-treesitter.configs',
   opts = {
     ensure_installed = {
       'c',
-      'javascript', 
+      'javascript',
       'typescript',
-      'lua', 
+      'lua',
       'luadoc',
-      'markdown', 
+      'markdown',
       'markdown_inline',
       'python',
       'php',

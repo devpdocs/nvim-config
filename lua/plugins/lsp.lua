@@ -34,6 +34,9 @@ return {
       if client.name == "rust_analyzer" then
         vim.lsp.inlay_hint.enable(true, { bufnr = bufnr })
       end
+      if client.name == "clangd" then
+        client.server_capabilities.signatureHelpProvider = false
+      end
     end
 
     local capabilities = vim.lsp.protocol.make_client_capabilities()
@@ -81,6 +84,8 @@ return {
     })
     require('lspconfig').rust_analyzer.setup({
       on_attch = on_attach,
+    })
+    require('lspconfig').clangd.setup({
     })
   end
 }
