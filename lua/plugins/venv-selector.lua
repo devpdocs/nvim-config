@@ -4,8 +4,9 @@ return {
   opts = {
     -- Your options go here
 
-    stay_on_this_version = true
-    -- name = "venv",
+    stay_on_this_version = true,
+    auto_refresh = true,
+    name = { 'venv', 'env' }
     -- auto_refresh = false
   },
   event = 'VeryLazy', -- Optional: needed only if you want to type `:VenvSelect` without a keymapping
