@@ -63,6 +63,7 @@ end, {})
 vim.keymap.set({ 'n' }, '<leader><leader>dr', ':DjangoServerStart<cr>', {})
 vim.keymap.set({ 'n' }, '<leader><leader>ds', ':DjangoServerStop<cr>', {})
 vim.keymap.set({ 'n' }, '<leader><leader>ngr', ':NgServe<cr>', {})
+vim.keymap.set({ 'n' }, '<leader><leader>ngo', ':NgServe -o<cr>', {})
 vim.keymap.set({ 'n' }, '<leader><leader>ngs', ':NgStop<cr>', {})
 
 vim.api.nvim_create_autocmd({ 'VimLeavePre' }, {
