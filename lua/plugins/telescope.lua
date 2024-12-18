@@ -25,7 +25,7 @@ return {
   end,
   keys = {
     {
-      "<leader><leader>",
+      "<leader><cr>",
       function()
         require('telescope.builtin').git_files({ show_untracked = true })
       end,

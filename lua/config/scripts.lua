@@ -70,10 +70,18 @@ vim.api.nvim_create_autocmd({ 'VimLeavePre' }, {
   callback = function()
     if job_django ~= nil then
       job_django:kill(15)
+    else
+      vim.notify("The django server currently is stop " .. venv_selector.get_active_venv(), vim.log.levels.WARN, {
+        title = "Django server"
+      })
     end
 
     if job_ng ~= nil then
       job_ng:kill(15)
+    else
+      vim.notify("The ng server currently is stop ", vim.log.levels.WARN, {
+        title = "Ng Server"
+      })
     end
   end
 })
