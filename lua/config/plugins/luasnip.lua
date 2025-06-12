@@ -47,6 +47,8 @@ function M.setup()
       ls.change_choice(1)
     end
   end)
+  require("luasnip.loaders.from_vscode").lazy_load()
+  require("vim-react-snippets").lazy_load()
 end
 
 return M

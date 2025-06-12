@@ -6,11 +6,17 @@ return {
   },
   config = function()
     vim.keymap.set('n', '<leader>e', vim.diagnostic.open_float)
-    vim.keymap.set('n', '[d', vim.diagnostic.goto_prev)
-    vim.keymap.set('n', ']d', vim.diagnostic.goto_next)
+    vim.keymap.set('n', '[d', function()
+      vim.diagnostic.jump({ count = -1, float = true })
+    end, { desc = 'Anterior diagnóstico + float' })
+
+    vim.keymap.set('n', ']d', function()
+      vim.diagnostic.jump({ count = 1, float = true })
+    end, { desc = 'Siguiente diagnóstico + float' })
     vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist)
     local on_attach = function(client, bufnr)
       --- auto_complete ctr-x + ctrl-o
+      print("LSP attached: " .. client.name)
       vim.keymap.set('n', '.', vim.lsp.buf.hover, { buffer = bufnr })
       vim.bo[bufnr].omnifunc = 'v:lua.vim.lsp.omnifunc'
       local opts = { buffer = bufnr }
@@ -41,7 +47,6 @@ return {
 
     local capabilities = vim.lsp.protocol.make_client_capabilities()
     capabilities.textDocument.completion.completionItem.snippetSupport = true
-
     require('neodev').setup()
     require('lspconfig').lua_ls.setup({
       on_attach = on_attach,
@@ -68,6 +73,7 @@ return {
       filetypes = {
         'javascript',
         'typescript',
+        'typescriptreact'
       },
     })
     require('lspconfig').html.setup({
@@ -75,17 +81,29 @@ return {
       on_attach = on_attach
     })
     require('lspconfig').cssls.setup({
-      on_attch = on_attach,
+      on_attach = on_attach,
       capabilities = capabilities
     })
     require('lspconfig').jsonls.setup({
-      on_attch = on_attach,
+      on_attach = on_attach,
       capabilities = capabilities
     })
     require('lspconfig').rust_analyzer.setup({
-      on_attch = on_attach,
+      on_attach = on_attach,
+      capabilities = capabilities
     })
     require('lspconfig').clangd.setup({
+    })
+    require('lspconfig').markdown_oxide.setup({
+      on_attach = on_attach,
+      capabilities = capabilities
+    })
+    require('lspconfig').astro.setup({
+      on_attach = on_attach,
+      capabilities = capabilities,
+      cmd = { "astro-ls", "--stdio" },
+      filetypes = { "astro" },
+      root_dir = require("lspconfig.util").root_pattern("package.json", ".git"),
     })
   end
 }

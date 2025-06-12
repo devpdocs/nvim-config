@@ -7,6 +7,7 @@ return {
   opts = {
     ensure_installed = {
       'c',
+      'php';
       'javascript',
       'typescript',
       'lua',
@@ -22,6 +23,9 @@ return {
       'scss',
       'cpp',
       'c_sharp',
+      'json',
+      'jsonc',
+      'astro'
     },
     highlight = {
       enable = true,
