@@ -9,7 +9,6 @@ return {
       'c',
       'php';
       'javascript',
-      'typescript',
       'lua',
       'luadoc',
       'markdown',
