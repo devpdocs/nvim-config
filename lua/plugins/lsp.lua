@@ -77,9 +77,11 @@ return {
       },
     })
     require('lspconfig').astro.setup({
+      on_attach = on_attach,
+      capabilities = capabilities,
       init_options = {
         typescript = {
-          tsdk = "~/.config/nvim/node_modules/typescript/lib"
+          tdsk = "/node_modules/typescript/lib"
         }
       },
     })
