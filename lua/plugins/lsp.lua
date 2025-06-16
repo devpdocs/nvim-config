@@ -76,6 +76,15 @@ return {
         'typescriptreact'
       },
     })
+    require('lspconfig').astro.setup({
+      on_attach = on_attach,
+      capabilities = capabilities,
+      init_options = {
+        typescript = {
+          tdsk = "/node_modules/typescript/lib"
+        }
+      },
+    })
     require('lspconfig').html.setup({
       capabilities = capabilities,
       on_attach = on_attach
@@ -97,13 +106,6 @@ return {
     require('lspconfig').markdown_oxide.setup({
       on_attach = on_attach,
       capabilities = capabilities
-    })
-    require('lspconfig').astro.setup({
-      on_attach = on_attach,
-      capabilities = capabilities,
-      cmd = { "astro-ls", "--stdio" },
-      filetypes = { "astro" },
-      root_dir = require("lspconfig.util").root_pattern("package.json", ".git"),
     })
   end
 }
