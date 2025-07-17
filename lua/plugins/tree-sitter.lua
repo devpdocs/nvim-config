@@ -24,7 +24,7 @@ return {
       'c_sharp',
       'json',
       'jsonc',
-      'astro'
+      'astro',
     },
     highlight = {
       enable = true,

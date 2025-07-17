@@ -11,6 +11,7 @@ return {
     },
     config = function()
       require("oil").setup({
+        delete_to_trash = true,
         columns = { "icon" },
         view_options = {
           show_hidden = true,
