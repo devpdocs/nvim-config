@@ -6,7 +6,7 @@ return {
 
     stay_on_this_version = true,
     auto_refresh = true,
-    name = { 'venv', 'env', 'qtile' }
+    name = { 'venv', 'env', 'qtile', '.venv' }
     -- auto_refresh = false
   },
   event = 'VeryLazy', -- Optional: needed only if you want to type `:VenvSelect` without a keymapping
