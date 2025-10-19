@@ -48,7 +48,8 @@ return {
     local capabilities = vim.lsp.protocol.make_client_capabilities()
     capabilities.textDocument.completion.completionItem.snippetSupport = true
     require('neodev').setup()
-    require('lspconfig').lua_ls.setup({
+
+    require("lspconfig").lua_ls.setup({
       on_attach = on_attach,
       settings = {
         Lua = {
