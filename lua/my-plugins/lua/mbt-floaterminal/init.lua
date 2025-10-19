@@ -69,15 +69,15 @@ M.setup = function(opts)
   if opts.killterm == true then
     local kill_terminal = function()
       if vim.api.nvim_buf_is_valid(state.floating.buf) then
-        vim.api.nvim_buf_delete(state.floating.buf, {force = true})
+        vim.api.nvim_buf_delete(state.floating.buf, { force = true })
         state.floating.buf = -1
-        vim.notify("Terminal has been closed", vim.log.levels.INFO, { title = 'floaterminal_nvim'})
+        vim.notify("Terminal has been closed", vim.log.levels.INFO, { title = 'floaterminal_nvim' })
       else
         vim.notify("No open terminal found", vim.log.levels.WARN, { title = 'floaterminal_nvim' })
       end
     end
     vim.api.nvim_create_user_command('FloaterminalKill', kill_terminal, {})
-    vim.keymap.set({'n', 't'}, '<leader>tr', kill_terminal)
+    vim.keymap.set({ 'n', 't' }, '<leader>tr', kill_terminal)
   end
 end
 
