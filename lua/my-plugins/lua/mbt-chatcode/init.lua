@@ -2,7 +2,7 @@ local M = {}
 
 local state = {
   winnr = -1,
-  bufnr = nil,
+  bufnr = -1,
   chan_id = nil
 }
 
@@ -90,7 +90,39 @@ local open_chat_code = function()
   vim.cmd("startinsert")
 end
 
+local kill_chat_code = function()
+
+  is_open = false
+
+  if vim.api.nvim_buf_is_valid(state.bufnr) then
+    vim.api.nvim_buf_delete(state.bufnr, { force = true })
+    state.bufnr = -1
+
+    vim.notify("Chat code has been closed", vim.log.levels.INFO, {
+      title = 'chatcode_nvim'
+    })
+  else
+    vim.notify("There isn't chat code open", vim.log.levels.WARN, {
+      title = 'chatcode_nvim'
+    })
+  end
+end
+
 M.chatcode = function()
+  local function increase_width()
+    if state.winnr and vim.api.nvim_win_is_valid(state.winnr) then
+      local current_width = vim.api.nvim_win_get_width(state.winnr)
+      vim.api.nvim_win_set_width(state.winnr, current_width + 5)
+    end
+  end
+
+  local function decrease_width()
+    if state.winnr and vim.api.nvim_win_is_valid(state.winnr) then
+      local current_width = vim.api.nvim_win_get_width(state.winnr)
+      vim.api.nvim_win_set_width(state.winnr, current_width - 5)
+    end
+  end
+
   local toggle_chat = function()
     if not vim.api.nvim_win_is_valid(state.winnr) then
       open_chat_code()
@@ -101,11 +133,17 @@ M.chatcode = function()
 
   vim.api.nvim_create_user_command("ChatCode", toggle_chat, {})
   vim.keymap.set({ 'n', 't' }, '<leader>cc', toggle_chat, { desc = "Toggle floating terminal" })
-  vim.keymap.set({ 'n', 't' }, '<leader>l', set_chat_windown)
+  vim.keymap.set({ 'n', 't' }, '<leader>cl', set_chat_windown)
+  vim.keymap.set({ 'n', 't' }, '<leader><Right>', decrease_width, { desc = "Increase chat width" })
+  vim.keymap.set({ 'n', 't' }, '<leader><Left>', increase_width, { desc = "Decrease chat width" })
 end
 
 
 M.setup = function(opts)
+  if opts.kill_chat_code == true then
+    vim.api.nvim_create_user_command('ChatCodeKill', kill_chat_code, {})
+    vim.keymap.set({ 'n', 't' }, '<leader>cd', kill_chat_code)
+  end
 end
 
 
