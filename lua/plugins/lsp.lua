@@ -49,7 +49,7 @@ return {
     capabilities.textDocument.completion.completionItem.snippetSupport = true
     require('neodev').setup()
 
-    require("lspconfig").lua_ls.setup({
+    vim.lsp.config("lua_ls", {
       on_attach = on_attach,
       settings = {
         Lua = {
@@ -58,7 +58,7 @@ return {
         },
       },
     })
-    require('lspconfig').pyright.setup({
+    vim.lsp.config('pyright',{
       on_attach = on_attach,
       settings = {
         python = {
@@ -68,8 +68,7 @@ return {
       },
 
     })
-    require('lspconfig').ts_ls.setup({
-
+    vim.lsp.config('ts_ls', {
       on_attach = on_attach,
       filetypes = {
         'javascript',
@@ -77,7 +76,7 @@ return {
         'typescriptreact'
       },
     })
-    require('lspconfig').astro.setup({
+    vim.lsp.config('astro', {
       on_attach = on_attach,
       capabilities = capabilities,
       init_options = {
@@ -86,25 +85,25 @@ return {
         }
       },
     })
-    require('lspconfig').html.setup({
+    vim.lsp.config('html', {
       capabilities = capabilities,
       on_attach = on_attach
     })
-    require('lspconfig').cssls.setup({
+    vim.lsp.config('cssls', {
       on_attach = on_attach,
       capabilities = capabilities
     })
-    require('lspconfig').jsonls.setup({
+    vim.lsp.config('jsonls', {
       on_attach = on_attach,
       capabilities = capabilities
     })
-    require('lspconfig').rust_analyzer.setup({
+    vim.lsp.config('rust_analyzer', {
       on_attach = on_attach,
       capabilities = capabilities
     })
-    require('lspconfig').clangd.setup({
+    vim.lsp.config('clangd', {
     })
-    require('lspconfig').markdown_oxide.setup({
+    vim.lsp.config('markdown_oxide', {
       on_attach = on_attach,
       capabilities = capabilities
     })
