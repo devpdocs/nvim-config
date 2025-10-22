@@ -58,6 +58,8 @@ return {
         },
       },
     })
+
+    vim.lsp.enable("lua_ls")
     vim.lsp.config('pyright',{
       on_attach = on_attach,
       settings = {
