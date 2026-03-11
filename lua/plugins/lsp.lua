@@ -17,7 +17,7 @@ return {
     local on_attach = function(client, bufnr)
       --- auto_complete ctr-x + ctrl-o
       print("LSP attached: " .. client.name)
-      vim.keymap.set('n', '.', vim.lsp.buf.hover, { buffer = bufnr })
+      vim.keymap.set('n', '\\', vim.lsp.buf.hover, { buffer = bufnr })
       vim.bo[bufnr].omnifunc = 'v:lua.vim.lsp.omnifunc'
       local opts = { buffer = bufnr }
       vim.keymap.set('n', 'gD', vim.lsp.buf.declaration, opts)
@@ -60,16 +60,32 @@ return {
     })
 
     vim.lsp.enable("lua_ls")
-    vim.lsp.config('pyright',{
+
+    vim.lsp.config('pyright', {
       on_attach = on_attach,
       settings = {
+        pyright = {
+          disableOrganizeImports = true,
+        },
         python = {
-          telemetry = { enable = false },
-          workspace = { checkThirdparty = false },
+          analysis = {
+            ingore = { '*' },
+          },
         },
       },
 
     })
+    vim.lsp.enable('pyright')
+    -- vim.lsp.config('ruff',{
+    --   on_attach = on_attach,
+    --   init_options = {
+    --     settings = {
+    --       logLevel = 'debug',
+    --     }
+    --   }
+    --
+    -- })
+    vim.lsp.enable('ruff')
     vim.lsp.config('ts_ls', {
       on_attach = on_attach,
       filetypes = {
@@ -78,6 +94,14 @@ return {
         'typescriptreact'
       },
     })
+    vim.lsp.enable('ts_ls')
+
+    vim.lsp.config('omnisharp', {
+      on_attach = on_attach
+    })
+    vim.lsp.enable('omnisharp')
+
+
     vim.lsp.config('astro', {
       on_attach = on_attach,
       capabilities = capabilities,
@@ -87,6 +111,7 @@ return {
         }
       },
     })
+
     vim.lsp.config('html', {
       capabilities = capabilities,
       on_attach = on_attach
@@ -99,15 +124,32 @@ return {
       on_attach = on_attach,
       capabilities = capabilities
     })
+    vim.lsp.enable("jsonls")
     vim.lsp.config('rust_analyzer', {
       on_attach = on_attach,
       capabilities = capabilities
     })
+    vim.lsp.enable("rust_analyzer")
     vim.lsp.config('clangd', {
     })
+    vim.lsp.config('gopls', {
+      capabilities = capabilities,
+      on_attach = on_attach,
+      settings = {
+        gopls = {
+          analyses = {
+            unusedparams = true,
+          },
+          staticcheck = true,
+          gofumpt = true,
+        },
+      },
+    })
+    vim.lsp.enable('gopls')
     vim.lsp.config('markdown_oxide', {
       on_attach = on_attach,
       capabilities = capabilities
     })
+    vim.lsp.enable('markdown_oxide')
   end
 }

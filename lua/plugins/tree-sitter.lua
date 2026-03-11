@@ -25,6 +25,7 @@ return {
       'json',
       'jsonc',
       'astro',
+      'go',
     },
     highlight = {
       enable = true,

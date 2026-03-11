@@ -6,7 +6,12 @@ return {
     require("onedarkpro").setup({
       options = {
         transparency = true
-      }
+      },
+      -- styles = {
+      --   comments = "italic",
+      --   keywords = "italic",
+      --   functions = "italic",
+      -- }
     })
     vim.cmd("colorscheme onedark")
   end,
