@@ -1,79 +1,124 @@
 local M = {}
 
+local default_config = {
+  tool = "gemini",
+  kill_chat_code = false,
+  providers = {
+    gemini = {
+      cmd = { "gemini" },
+    },
+    codex = {
+      cmd = { "codex" },
+    },
+  },
+}
+
+local config = vim.deepcopy(default_config)
+
 local state = {
   winnr = -1,
   bufnr = -1,
   chan_id = nil,
 }
 
-local is_open = nil
+local is_open = false
+local active_tool = default_config.tool
 
-local check_and_install_gemini_cli = function()
+local function normalize_cmd(cmd)
+  if type(cmd) == "string" then
+    return { cmd }
+  end
+
+  if type(cmd) == "table" and #cmd > 0 then
+    return cmd
+  end
+
+  return nil
+end
+
+local function list_provider_names()
+  local names = {}
+  for name, _ in pairs(config.providers or {}) do
+    table.insert(names, name)
+  end
+  table.sort(names)
+  return names
+end
+
+local function check_and_install_gemini_cli()
   if vim.fn.executable("gemini") == 1 then
     return true
   end
 
-  -- Not installed, ask the user
   local answer = vim.fn.input("gemini-cli not found. Install with npm? (y/n): ")
   if string.lower(answer or "") ~= "y" then
-    vim.notify("Installation skipped.", vim.log.levels.WARN)
+    vim.notify("Installation skipped.", vim.log.levels.WARN, { title = "chatcode_nvim" })
     return false
   end
 
-  -- User agreed, attempt installation
-  --
-  vim.notify("Installing @google/gemini-cli via npm...", vim.log.levels.INFO)
-
-  local cmd = "npm install -g @google/gemini-cli"
-
-  vim.fn.termopen(cmd, {
-    on_exit = function()
-      vim.notify("Gemini CLI installation finished. Please restart Neovim to use the plugin.")
-    end,
-  })
+  vim.notify("Installing @google/gemini-cli via npm...", vim.log.levels.INFO, { title = "chatcode_nvim" })
+  local output = vim.fn.system({ "npm", "install", "-g", "@google/gemini-cli" })
 
   if vim.v.shell_error ~= 0 then
-    vim.notify("Failed to install gemini-cli. Error: " .. output, vim.log.levels.ERROR)
+    vim.notify("Failed to install gemini-cli: " .. (output or ""), vim.log.levels.ERROR, { title = "chatcode_nvim" })
     return false
   end
 
-  -- Verify installation after attempting to install
   if vim.fn.executable("gemini") == 1 then
-    vim.notify("gemini-cli installed successfully!", vim.log.levels.INFO)
-  else
-    vim.notify("Installation command ran, but 'gemini' is still not in PATH.", vim.log.levels.ERROR)
+    vim.notify("gemini-cli installed successfully!", vim.log.levels.INFO, { title = "chatcode_nvim" })
+    return true
+  end
+
+  vim.notify("Installation finished, but 'gemini' is still not in PATH.", vim.log.levels.ERROR, { title = "chatcode_nvim" })
+  return false
+end
+
+local function ensure_provider_available(provider_name)
+  local provider = config.providers[provider_name]
+  if not provider then
+    vim.notify("Unknown provider: " .. tostring(provider_name), vim.log.levels.ERROR, { title = "chatcode_nvim" })
     return false
   end
-  return true
+
+  provider.cmd = normalize_cmd(provider.cmd)
+  if not provider.cmd then
+    vim.notify("Invalid command for provider: " .. provider_name, vim.log.levels.ERROR, { title = "chatcode_nvim" })
+    return false
+  end
+
+  local executable = provider.cmd[1]
+  if vim.fn.executable(executable) == 1 then
+    return true
+  end
+
+  if provider_name == "gemini" and executable == "gemini" then
+    return check_and_install_gemini_cli()
+  end
+
+  vim.notify(
+    string.format("Provider '%s' is not available. Missing executable: %s", provider_name, executable),
+    vim.log.levels.ERROR,
+    { title = "chatcode_nvim" }
+  )
+  return false
 end
 
-local hide_chat_terminal = function()
-  vim.api.nvim_win_hide(state.winnr)
+local function hide_chat_terminal()
+  if state.winnr and vim.api.nvim_win_is_valid(state.winnr) then
+    vim.api.nvim_win_hide(state.winnr)
+  end
 end
 
-local open_gemini_cli = function()
-  state.chan_id = vim.fn.termopen({ "gemini" }, {
-    cwd = vim.loop.cwd(),
-    on_exit = function(_, code, _)
-      if code ~= 0 then
-        vim.notify("Gemini CLI terminó con código: " .. code, vim.log.levels.WARN)
-      end
-    end,
-  })
-end
-
-local set_chat_windown = function()
+local function set_chat_windown()
   if state.winnr and vim.api.nvim_win_is_valid(state.winnr) then
     vim.api.nvim_set_current_win(state.winnr)
-
     return
   end
 end
 
-local create_floating_window = function(opts)
+local function create_floating_window(opts)
   opts = opts or {}
 
-  -- Obtener dimensiones del viewport
   local width = vim.o.columns
   local height = vim.o.lines
 
@@ -88,7 +133,6 @@ local create_floating_window = function(opts)
     state.bufnr = buf
   end
 
-  -- Borde solo en el lado izquierdo (plano)
   local left_border = {
     { " ", "Normal" },
     { " ", "Normal" },
@@ -115,11 +159,43 @@ local create_floating_window = function(opts)
   return { winnr = win, bufnr = buf }
 end
 
-local open_chat_code = function()
+local function open_provider_cli(provider_name)
+  local provider = config.providers[provider_name]
+
+  state.chan_id = vim.fn.termopen(provider.cmd, {
+    cwd = vim.loop.cwd(),
+    on_exit = function(_, code, _)
+      if code ~= 0 then
+        vim.notify(
+          string.format("%s terminó con código: %s", provider_name, tostring(code)),
+          vim.log.levels.WARN,
+          { title = "chatcode_nvim" }
+        )
+      end
+    end,
+  })
+
+  if state.chan_id <= 0 then
+    vim.notify("Failed to open terminal for provider: " .. provider_name, vim.log.levels.ERROR, { title = "chatcode_nvim" })
+    return false
+  end
+
+  return true
+end
+
+local function open_chat_code()
   state = create_floating_window({ buf = state.bufnr })
 
   if not is_open then
-    open_gemini_cli()
+    if not ensure_provider_available(active_tool) then
+      hide_chat_terminal()
+      return
+    end
+
+    if not open_provider_cli(active_tool) then
+      hide_chat_terminal()
+      return
+    end
 
     is_open = true
   end
@@ -127,7 +203,7 @@ local open_chat_code = function()
   vim.cmd("startinsert")
 end
 
-local kill_chat_code = function()
+local function kill_chat_code()
   is_open = false
 
   if vim.api.nvim_buf_is_valid(state.bufnr) then
@@ -142,6 +218,35 @@ local kill_chat_code = function()
       title = "chatcode_nvim",
     })
   end
+end
+
+local function set_active_tool(tool_name, opts)
+  opts = opts or {}
+
+  if not config.providers[tool_name] then
+    vim.notify("Invalid tool: " .. tostring(tool_name), vim.log.levels.ERROR, { title = "chatcode_nvim" })
+    return false
+  end
+
+  active_tool = tool_name
+
+  local available = ensure_provider_available(active_tool)
+  if not available then
+    vim.notify(
+      "Tool selected but unavailable right now: " .. active_tool,
+      vim.log.levels.WARN,
+      { title = "chatcode_nvim" }
+    )
+  end
+
+  vim.notify("Active ChatCode tool: " .. active_tool, vim.log.levels.INFO, { title = "chatcode_nvim" })
+
+  if opts.restart and is_open then
+    kill_chat_code()
+    open_chat_code()
+  end
+
+  return true
 end
 
 M.chatcode = function()
@@ -159,7 +264,7 @@ M.chatcode = function()
     end
   end
 
-  local toggle_chat = function()
+  local function toggle_chat()
     if not vim.api.nvim_win_is_valid(state.winnr) then
       open_chat_code()
     else
@@ -175,17 +280,41 @@ M.chatcode = function()
 end
 
 M.setup = function(opts)
+  opts = opts or {}
+  config = vim.tbl_deep_extend("force", vim.deepcopy(default_config), opts)
 
-  if not check_and_install_gemini_cli() then
-    return
+  if not config.providers[config.tool] then
+    vim.notify(
+      string.format("Unknown default tool '%s'. Falling back to gemini.", tostring(config.tool)),
+      vim.log.levels.WARN,
+      { title = "chatcode_nvim" }
+    )
+    config.tool = "gemini"
   end
 
-  if opts.kill_chat_code == true then
+  active_tool = config.tool
+  ensure_provider_available(active_tool)
+
+  vim.api.nvim_create_user_command("ChatCodeTool", function(command_opts)
+    local name = vim.trim(command_opts.args or "")
+
+    if name == "" then
+      vim.notify("Active ChatCode tool: " .. active_tool, vim.log.levels.INFO, { title = "chatcode_nvim" })
+      return
+    end
+
+    set_active_tool(name, { restart = true })
+  end, {
+    nargs = "?",
+    complete = function()
+      return list_provider_names()
+    end,
+  })
+
+  if config.kill_chat_code == true then
     vim.api.nvim_create_user_command("ChatCodeKill", kill_chat_code, {})
     vim.keymap.set({ "n", "t" }, "<leader>cd", kill_chat_code)
   end
-
-  
 end
 
 return M
