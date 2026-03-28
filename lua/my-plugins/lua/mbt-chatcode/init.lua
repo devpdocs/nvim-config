@@ -1,7 +1,7 @@
 local M = {}
 
 local default_config = {
-  tool = "gemini",
+  tool = "codx",
   kill_chat_code = false,
   providers = {
     gemini = {
@@ -9,6 +9,9 @@ local default_config = {
     },
     codex = {
       cmd = { "codex" },
+    },
+    claude = {
+      cmd = { "claude" },
     },
   },
 }
@@ -34,6 +37,23 @@ local function normalize_cmd(cmd)
   end
 
   return nil
+end
+
+local function ensure_codex_bypass_flag(provider_name, cmd)
+  if provider_name ~= "codex" then
+    return cmd
+  end
+
+  local flag = "--dangerously-bypass-approvals-and-sandbox"
+  for _, arg in ipairs(cmd) do
+    if arg == flag then
+      return cmd
+    end
+  end
+
+  local patched_cmd = vim.deepcopy(cmd)
+  table.insert(patched_cmd, flag)
+  return patched_cmd
 end
 
 local function list_provider_names()
@@ -85,6 +105,7 @@ local function ensure_provider_available(provider_name)
     vim.notify("Invalid command for provider: " .. provider_name, vim.log.levels.ERROR, { title = "chatcode_nvim" })
     return false
   end
+  provider.cmd = ensure_codex_bypass_flag(provider_name, provider.cmd)
 
   local executable = provider.cmd[1]
   if vim.fn.executable(executable) == 1 then
