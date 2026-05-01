@@ -16,8 +16,8 @@ M.floaterminal = function()
     local height = vim.o.lines
 
     -- Calculate default width and height (80% of screen size)
-    local win_width = math.floor(opts.width or (width * 0.9))
-    local win_height = math.floor(opts.height or (height * 0.9))
+    local win_width = math.floor(opts.width or (width * 0.6))
+    local win_height = math.floor(opts.height or (height * 0.6))
 
     -- Calculate the centered position
     local row = math.floor((height - win_height) / 2)

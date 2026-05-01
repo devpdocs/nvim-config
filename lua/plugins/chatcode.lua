@@ -5,7 +5,7 @@ return {
     require('my-plugins/lua/mbt-chatcode').chatcode()
     require('my-plugins/lua/mbt-chatcode').setup({
       kill_chat_code = true,
-      tool = 'gemini',
+      tool = 'opencode',
     })
   end,
   event = 'VeryLazy'

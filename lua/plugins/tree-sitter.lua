@@ -29,6 +29,7 @@ return {
     },
     highlight = {
       enable = true,
+      -- disable = { "python" }, -- Temporary workaround
     },
     indent = {
       enable = true,

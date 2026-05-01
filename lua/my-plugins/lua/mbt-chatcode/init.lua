@@ -1,9 +1,16 @@
 local M = {}
 
 local default_config = {
-  tool = "codx",
+  tool = "opencode",
   kill_chat_code = false,
   providers = {
+    -- qwen = {
+    --   cmd = { "qwen" },
+    -- },
+    opencode = {
+      cmd = { "opencode" },
+      agent = "build",
+    },
     gemini = {
       cmd = { "gemini" },
     },
@@ -53,6 +60,28 @@ local function ensure_codex_bypass_flag(provider_name, cmd)
 
   local patched_cmd = vim.deepcopy(cmd)
   table.insert(patched_cmd, flag)
+  return patched_cmd
+end
+
+local function ensure_opencode_agent_flag(provider_name, provider)
+  if provider_name ~= "opencode" then
+    return provider.cmd
+  end
+
+  for _, arg in ipairs(provider.cmd) do
+    if arg == "--agent" or string.match(arg, "^%-%-agent=") then
+      return provider.cmd
+    end
+  end
+
+  local agent = vim.trim(tostring(provider.agent or ""))
+  if agent == "" then
+    return provider.cmd
+  end
+
+  local patched_cmd = vim.deepcopy(provider.cmd)
+  table.insert(patched_cmd, "--agent")
+  table.insert(patched_cmd, agent)
   return patched_cmd
 end
 
@@ -106,6 +135,7 @@ local function ensure_provider_available(provider_name)
     return false
   end
   provider.cmd = ensure_codex_bypass_flag(provider_name, provider.cmd)
+  provider.cmd = ensure_opencode_agent_flag(provider_name, provider)
 
   local executable = provider.cmd[1]
   if vim.fn.executable(executable) == 1 then
@@ -306,11 +336,11 @@ M.setup = function(opts)
 
   if not config.providers[config.tool] then
     vim.notify(
-      string.format("Unknown default tool '%s'. Falling back to gemini.", tostring(config.tool)),
+      string.format("Unknown default tool '%s'. Falling back to opencode.", tostring(config.tool)),
       vim.log.levels.WARN,
       { title = "chatcode_nvim" }
     )
-    config.tool = "gemini"
+    config.tool = "opencode"
   end
 
   active_tool = config.tool
