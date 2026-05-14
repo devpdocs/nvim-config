@@ -5,16 +5,9 @@ local M = {}
 
 function M.setup()
   ls.config.set_config {
-    -- This tells LuaSnip to remember to keep around the last snippet.
-    -- You can jump back into even if you move outside of the selection
     history = true,
-
-    -- This one is cool cause if you have dynamic snippets, it updatesas you type!
     updateevents = "TextChanged,TextChangedI",
-
-    -- Autosnippets:
     enable_autosnippets = true,
-
     ext_opts = {
       [types.choiceNode] = {
         active = {
@@ -23,32 +16,34 @@ function M.setup()
       },
     },
   }
- 
-  -- <c-k> is my expansion key
-  -- this will expand the current item or jump to the next item within the snippet.
+
   vim.keymap.set({ "i", "s" }, "<c-k>", function()
     if ls.expand_or_jumpable() then
       ls.expand_or_jump()
     end
   end, { silent = true })
 
-  -- <c-j> is my jump backwards key.
-  -- this always moves to the previous item within the snippet
   vim.keymap.set({ "i", "s" }, "<c-j>", function()
     if ls.jumpable(-1) then
       ls.jump(-1)
     end
   end, { silent = true })
 
-  -- <c-l> is selecting within a list of options.
-  -- This is useful for choice nodes (introduced in the forthcoming episode 2)
   vim.keymap.set("i", "<c-l>", function()
     if ls.choice_active() then
       ls.change_choice(1)
     end
   end)
+
+  -- Carga snippets de VSCode (friendly-snippets, etc.)
   require("luasnip.loaders.from_vscode").lazy_load()
-  require("vim-react-snippets").lazy_load()
+
+  -- vim-react-snippets ya no expone lazy_load() directamente.
+  -- Se carga mediante el loader de LuaSnip apuntando a su runtimepath.
+  require("luasnip.loaders.from_vscode").lazy_load({
+    paths = { vim.fn.stdpath("data") .. "/lazy/vim-react-snippets" },
+  })
 end
 
 return M
+
