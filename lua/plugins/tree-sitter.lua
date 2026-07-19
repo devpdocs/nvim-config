@@ -22,6 +22,7 @@ return {
       'php',
       'rust',
       'typescript',
+      'tsx',
       'html',
       'css',
       'scss',
